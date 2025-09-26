@@ -1,0 +1,95 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FEWCON - Water Management Details</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0; line-height: 1.6; color: #333; }
+    header { background: #fff; padding: 1rem 2rem; border-bottom: 2px solid #003087; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1.5rem; font-weight: bold; color: #003087; display: flex; align-items: center; }
+    .logo img { width: 40px; margin-right: 0.5rem; }
+    nav ul { list-style: none; display: flex; gap: 1.5rem; margin: 0; padding: 0; }
+    nav a { text-decoration: none; color: #333; font-weight: bold; }
+    nav a:hover { color: #003087; }
+    .content { padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; text-align: center; }
+    .content h1 { color: #003087; }
+    .content p { margin: 1rem 0; }
+    .content ul { list-style-type: disc; padding-left: 20px; text-align: left; margin: 1rem 0; }
+    .back-button { background: #003087; color: #fff; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; }
+    .back-button:hover { background: #0044b3; }
+    @media (max-width: 768px) { nav ul { flex-direction: column; gap: 0.5rem; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="https://i.postimg.cc/xTNTThnB/Fewcon.png" alt="FEWCON Logo">
+      FEWCON
+    </div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#services">Services</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="content">
+    <h1>Water Management Services</h1>
+    <p>Explore our comprehensive water management solutions designed to address your specific needs:</p>
+    <ul>
+      <li><strong>Water Use Licensing:</strong> Expert assistance in applications under Section 21 of the National Water Act (Act 36 of 1998), DWS risk matrix, authority engagement, and follow-up.</li>
+      <li><strong>General Authorisation:</strong> Support for general authorisations related to water use.</li>
+      <li><strong>Wetland Delineation and Functional Assessment:</strong> Accurate identification and functional evaluation of wetland areas.</li>
+      <li><strong>Water Use Auditing and Management:</strong> Ensuring compliance and efficient water resource use.</li>
+      <li><strong>IWWMP:</strong> Integrated Water and Waste Management Plans tailored to operations as required by DWS.</li>
+      <li><strong>Water Balance Assessment:</strong> Detailed analysis to optimise water usage.</li>
+      <li><strong>Hydropedology Assessments:</strong> Studying soil-water relationships for improved management.</li>
+      <li><strong>GN704 Auditing:</strong> Compliance auditing with regulatory standards for mining operations.</li>
+    </ul>
+    <a href="index.html#services" class="back-button">Back to Services</a>
+  </div>
+</body>
+</html>
