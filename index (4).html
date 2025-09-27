@@ -1,0 +1,194 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FEWCON - Sustainable Water Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0; line-height: 1.6; color: #333; }
+    header { background: #fff; padding: 1rem 2rem; border-bottom: 2px solid #003087; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1.5rem; font-weight: bold; color: #003087; display: flex; align-items: center; }
+    .logo img { width: 40px; margin-right: 0.5rem; }
+    nav ul { list-style: none; display: flex; gap: 1.5rem; margin: 0; padding: 0; }
+    nav a { text-decoration: none; color: #333; font-weight: bold; }
+    nav a:hover { color: #003087; }
+    .hero { background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://i.postimg.cc/Yq5qNS0s/tory-keeter-YQw-Y1dtxcfo-unsplash.jpg') center/cover no-repeat; padding: 4rem 2rem; text-align: center; border-bottom: 1px solid #ddd; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+    .hero h1 { font-size: 2.5rem; color: #fff; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; }
+    .hero h1 img { width: 40px; margin-right: 0.5rem; }
+    .hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto; }
+    .about { padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; }
+    .about h2 { color: #003087; text-align: center; }
+    .services { padding: 3rem 2rem; background: #f9f9f9; }
+    .services h2 { color: #003087; text-align: center; margin-bottom: 2rem; }
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto; }
+    .service-card { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+    .service-card i { font-size: 2.5rem; width: 80px; height: 80px; line-height: 80px; margin-bottom: 1rem; }
+    .service-card h3 { color: #003087; }
+    .service-card ul { list-style-type: disc; padding-left: 20px; text-align: left; margin: 1rem 0; }
+    .read-more { background: #0055cc; color: #fff; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; display: inline-block; margin-top: 1rem; }
+    .read-more:hover { background: #0044b3; }
+    .contact { padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; text-align: center; }
+    .contact h2 { color: #003087; margin-bottom: 1.5rem; }
+    .contact p { margin: 0.5rem 0; }
+    .contact a { color: #003087; text-decoration: none; }
+    .contact a:hover { text-decoration: underline; }
+    .contact-form { margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .contact-form input, .contact-form textarea { width: 100%; padding: 0.75rem; margin: 0.5rem 0; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; }
+    .contact-form textarea { height: 150px; resize: vertical; }
+    .contact-form button { background: #003087; color: #fff; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+    .contact-form button:hover { background: #0044b3; }
+    footer { background: #333; color: #fff; text-align: center; padding: 1rem; }
+    footer a { color: #fff; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 768px) { 
+      .hero h1 { font-size: 2rem; } 
+      nav ul { flex-direction: column; gap: 0.5rem; } 
+      .contact p { font-size: 1rem; }
+      .contact-form input, .contact-form textarea { font-size: 0.9rem; }
+    }
+  </style>
+  <script>
+    // Generate a random 4-digit number for CAPTCHA
+    let captchaNumber;
+    document.addEventListener('DOMContentLoaded', function() {
+      captchaNumber = Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('captchaDisplay').value = captchaNumber;
+    });
+
+    function validateForm(event) {
+      const userCaptcha = document.getElementById('captchaInput').value;
+      if (userCaptcha !== captchaNumber.toString()) {
+        event.preventDefault();
+        alert('CAPTCHA verification failed. Please enter the correct number.');
+        return false;
+      }
+      return true;
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="https://i.postimg.cc/xTNTThnB/Fewcon.png" alt="FEWCON Logo">
+      FEWCON
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="hero" id="home">
+    <h1>
+      <img src="https://i.postimg.cc/xTNTThnB/Fewcon.png" alt="FEWCON Logo">
+      FEWCON
+    </h1>
+    <p>Sustainable Water Management</p>
+  </section>
+
+  <section class="about" id="about">
+    <h2>Practical Solutions, Environmental Awareness</h2>
+    <p>FEWCON is a forward-thinking consultancy dedicated to sustainable water and environmental solutions, serving clients in the mining, industrial, and agricultural sectors throughout Sub-Saharan Africa. Leveraging our deep expertise and years of experience, we provide practical, customised strategies to address water and environmental challenges while ensuring compliance and minimising risks. Our mission is to drive sustainable progress through holistic water and environmental management. We aim to lead the industry by offering a seamless, multi-disciplinary platform that delivers innovative solutions for water use licensing, wetland delineation, environmental auditing, and beyond. Through trusted partnerships with our clients, FEWCON ensures exceptional guidance and promotes industry-leading standards.</p>
+  </section>
+
+  <section class="services" id="services">
+    <h2>Our Core Services</h2>
+    <div class="services-grid">
+      <div class="service-card">
+        <i class="fas fa-water" aria-hidden="true"></i>
+        <h3>Water Management</h3>
+        <ul>
+          <li>Water Use Licensing Applications (WULA)</li>
+          <li>General Authorisation</li>
+          <li>Wetland Delineation and Functional Assessment</li>
+          <li>Water Use Auditing and Management</li>
+          <li>IWWMP</li>
+          <li>Water Balance Assessment</li>
+          <li>GN704 Auditing</li>
+        </ul>
+        <a href="water-management.html" class="read-more">Read More</a>
+      </div>
+      <div class="service-card">
+        <i class="fas fa-leaf" aria-hidden="true"></i>
+        <h3>Environmental</h3>
+        <ul>
+          <li>Environmental Management Plans</li>
+          <li>Environmental Auditing (ECO services)</li>
+          <li>Maintenance Management Plans</li>
+          <li>Sec 34 Compliance Auditing</li>
+          <li>Contaminated Land Management</li>
+          <li>Waste Audit, Classification and Management Plans</li>
+        </ul>
+        <a href="environmental.html" class="read-more">Read More</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <h2>Contact Us</h2>
+    <p><strong>Contact:</strong> PJ Viljoen, Pr.Sci.Nat.</p>
+    <p><strong>Email:</strong> <a href="mailto:pj@fewcon.co.za">pj@fewcon.co.za</a></p>
+    <p><strong>Phone:</strong> <a href="tel:+270693304360">+27 069 330 4360</a></p>
+    <p><strong>Address:</strong> Cape Town, South Africa</p>
+    <form class="contact-form" action="#" method="POST" onsubmit="return validateForm(event)">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <input type="tel" name="phone" placeholder="Your Contact Number" required>
+      <textarea name="message" placeholder="Your Message" required></textarea>
+      <div>
+        <input type="text" id="captchaDisplay" readonly>
+        <input type="text" id="captchaInput" placeholder="Enter this number" required>
+      </div>
+      <button type="submit">Send Message</button>
+    </form>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 FEWCON. All rights reserved. | <a href="#contact">Contact Us</a></p>
+  </footer>
+</body>
+</html>
