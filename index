@@ -160,6 +160,17 @@
                         </div>
                     </div> <!-- single features -->
                       </div>
+				</div>
+                <div class="col-lg-4 col-md-4">
+                    <div class="single_features text-center mt-30 wow fadeInUp" data-wow-duration="1.3s" data-wow-delay="0.5s">
+                        <div class="features_image">
+                            <img src="assets/images/hydrocarbon.png" alt="features">
+                        </div>
+                        <div class="features_content">
+                            <h4 class="features_title"><a href="#">Chemical and Hydrocarbon Management</a></h4>
+                        </div>
+                    </div> <!-- single features -->
+                      </div>
             </div> <!-- row -->
         </div> <!-- container -->
     </section>
